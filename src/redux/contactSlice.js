@@ -1,12 +1,22 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { persistReducer } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
+
+export const fetchContacts = createAsyncThunk('contacts/getAll', async () => {
+  const response = await fetch(
+    'https://655ba655ab37729791a96f46.mockapi.io/api/v1/my-contacts'
+  );
+  const data = await response.json();
+  return data;
+});
 
 const contactsSlice = createSlice({
   name: 'contacts',
   initialState: {
     contacts: [],
     filter: '',
+    isLoading: false,
+    error: null,
   },
   reducers: {
     addContact: (state, action) => {
@@ -20,6 +30,21 @@ const contactsSlice = createSlice({
     setFilter: (state, action) => {
       state.filter = action.payload;
     },
+  },
+  extraReducers: builder => {
+    builder
+      .addCase(fetchContacts.pending, state => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchContacts.fulfilled, (state, action) => {
+        state.contacts = action.payload;
+        state.isLoading = false;
+      })
+      .addCase(fetchContacts.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.error.message;
+      });
   },
 });
 

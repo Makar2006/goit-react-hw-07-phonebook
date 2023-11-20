@@ -16,7 +16,9 @@ export default function ContactForm() {
   });
 
   const onSubmit = (values, { resetForm }) => {
-    const Duplicate = contacts.some(contact => contact.name === values.name);
+    const Duplicate = contacts.some(
+      contact => contact.name.toLowerCase() === values.name.toLowerCase()
+    );
     if (Duplicate) {
       alert(`${values.name} is already created`);
     } else {
